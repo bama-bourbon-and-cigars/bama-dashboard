@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAMA Bourbon &amp; Cigars — Tasting Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+  --black:#15110d;
+  --black-2:#1d1712;
+  --paper:#f1e7d3;
+  --paper-2:#e8dabb;
+  --ink:#221a12;
+  --ink-soft:#5a4c3a;
+  --gold:#c8952a;
+  --gold-soft:#e0b45a;
+  --spice:#9c3b2e;
+  --oak:#6b4423;
+  --fruit:#c07a2f;
+  --sweet:#c8952a;
+  --grain:#8a6d3f;
+  --nut:#4a5d3a;
+  --wood:#6b4423;
+  --earth:#4a5d3a;
+  --leather:#3a2c22;
+  --line:#cbb98f;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--black);color:var(--ink);font-family:'Inter',sans-serif;}
+h1,h2,h3,.display{font-family:'Fraunces',serif;}
+
+/* ---- Header ---- */
+.topbar{
+  background:linear-gradient(180deg,#1a1410,#120e0a);
+  padding:22px 28px 0 28px;
+  border-bottom:3px solid var(--gold);
+}
+.brand-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;max-width:1180px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:14px;}
+.brand-mark{
+  width:52px;height:52px;border-radius:50%;
+  border:2px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 35% 30%, #2a2019, #120e0a);
+  color:var(--gold-soft);font-weight:700;font-size:11px;letter-spacing:0.5px;
+  text-align:center;line-height:1.1;
+}
+.brand-text .display{color:var(--paper);font-size:26px;margin:0;letter-spacing:0.5px;}
+.brand-text .sub{color:var(--gold-soft);font-size:12px;letter-spacing:1.5px;margin-top:2px;}
+
+.tabs{display:flex;gap:6px;max-width:1180px;margin:18px auto 0 auto;}
+.tab{
+  padding:11px 20px;background:transparent;border:none;
+  color:#a8967a;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;
+  cursor:pointer;border-radius:8px 8px 0 0;transition:background .15s,color .15s;
+}
+.tab.active{background:var(--paper);color:var(--ink);}
+.tab:not(.active):hover{background:#241c15;color:var(--paper);}
+
+/* ---- Layout ---- */
+main{max-width:1180px;margin:0 auto;padding:28px 20px 80px 20px;}
+.panel{display:none;}
+.panel.active{display:block;}
+
+.section{
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  padding:22px 24px;margin-bottom:18px;
+}
+.section h3{
+  margin:0 0 16px 0;font-size:15px;text-transform:none;letter-spacing:0.2px;
+  color:var(--ink);padding-bottom:10px;border-bottom:2px solid var(--gold);
+  display:inline-block;
+}
+.section-inner{}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px 24px;}
+@media(max-width:720px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+.field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;font-weight:600;}
+.field input[type=text],.field input[type=number],.field input[type=date],
+.field textarea, .field select{
+  width:100%;border:1px solid #c9b98e;background:#fbf6ea;border-radius:6px;
+  padding:9px 10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);
+}
+.field textarea{resize:vertical;min-height:64px;}
+.field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--gold);outline-offset:1px;}
+
+.check-row{display:flex;gap:18px;flex-wrap:wrap;margin-top:4px;}
+.check-row label{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink);font-weight:500;}
+
+/* ---- Flavor wheel (chip groups) ---- */
+.wheel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:820px){.wheel-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:520px){.wheel-grid{grid-template-columns:1fr;}}
+.category{border-radius:8px;overflow:hidden;border:1px solid rgba(0,0,0,0.15);}
+.category-head{
+  padding:9px 12px;color:#fff;font-weight:700;font-size:13px;letter-spacing:0.3px;
+}
+.category-body{background:#fbf6ea;padding:10px;display:flex;flex-wrap:wrap;gap:6px;}
+.chip{
+  border:1px solid #c9b98e;background:#fff;color:var(--ink);
+  padding:6px 11px;border-radius:20px;font-size:12.5px;font-weight:500;
+  cursor:pointer;transition:all .12s;
+}
+.chip.selected{color:#fff;border-color:transparent;}
+.selected-summary{margin-top:12px;font-size:13px;color:var(--ink-soft);min-height:18px;}
+.selected-summary b{color:var(--ink);}
+
+/* ---- Ratings ---- */
+.rating-row{display:flex;align-items:center;gap:14px;margin:6px 0 14px 0;flex-wrap:wrap;}
+.rating-row .rlabel{font-size:12.5px;color:var(--ink-soft);width:90px;font-weight:600;}
+.dots{display:flex;gap:8px;}
+.dot{
+  width:22px;height:22px;border-radius:50%;border:2px solid var(--ink-soft);
+  cursor:pointer;background:transparent;
+}
+.dot.active{background:var(--gold);border-color:var(--gold);}
+.stars{display:flex;gap:5px;}
+.star{font-size:24px;cursor:pointer;color:#c9b98e;line-height:1;user-select:none;}
+.star.active{color:var(--gold);}
+.swatch-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
+.swatch{width:44px;height:44px;border-radius:50%;cursor:pointer;border:3px solid transparent;position:relative;}
+.swatch.sel{border-color:var(--ink);}
+.swatch-label{font-size:10.5px;text-align:center;margin-top:4px;color:var(--ink-soft);}
+.swatch-wrap{text-align:center;}
+.radio-pill-row{display:flex;gap:8px;flex-wrap:wrap;}
+.radio-pill{
+  padding:7px 14px;border:1px solid #c9b98e;border-radius:20px;background:#fbf6ea;
+  font-size:12.5px;cursor:pointer;font-weight:500;
+}
+.radio-pill.sel{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+/* ---- Score ---- */
+.score-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.score-row .slabel{width:150px;font-size:13px;font-weight:600;color:var(--ink);}
+.score-row input[type=range]{flex:1;accent-color:var(--gold);}
+.score-row .sval{width:46px;text-align:right;font-weight:700;font-family:'Fraunces',serif;font-size:15px;}
+.total-box{
+  background:var(--black);color:var(--paper);border-radius:8px;padding:20px;
+  text-align:center;margin-top:8px;
+}
+.total-box .num{font-family:'Fraunces',serif;font-size:44px;color:var(--gold-soft);}
+.total-box .lbl{font-size:12px;letter-spacing:1.5px;color:#a8967a;margin-top:2px;}
+
+/* ---- Save bar ---- */
+.save-bar{display:flex;justify-content:flex-end;gap:10px;margin-top:6px;}
+.btn{
+  padding:12px 26px;border-radius:7px;border:none;font-weight:700;font-size:14px;
+  cursor:pointer;font-family:'Inter',sans-serif;
+}
+.btn-primary{background:var(--gold);color:#221a12;}
+.btn-primary:hover{background:var(--gold-soft);}
+.btn-ghost{background:transparent;color:var(--paper);border:1px solid #6a5c46;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold-soft);}
+.save-msg{color:var(--gold-soft);font-size:13px;align-self:center;margin-right:auto;}
+
+/* ---- History ---- */
+.hist-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:10px;
+  padding:16px 20px;margin-bottom:12px;
+}
+.hist-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.hist-title{font-family:'Fraunces',serif;font-size:18px;color:var(--ink);}
+.hist-meta{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+.hist-score{font-family:'Fraunces',serif;font-size:22px;color:var(--gold);text-align:right;}
+.hist-tags{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+.hist-tag{background:#fff;border:1px solid #c9b98e;border-radius:14px;padding:3px 10px;font-size:11.5px;color:var(--ink-soft);}
+.hist-actions{margin-top:10px;display:flex;gap:10px;}
+.hist-actions button{background:none;border:none;color:var(--ink-soft);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;}
+.hist-actions button:hover{color:var(--spice);}
+.empty-state{color:var(--paper-2);text-align:center;padding:50px 20px;}
+.empty-state .display{font-size:20px;color:var(--paper);margin-bottom:6px;}
+.type-pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:0.5px;padding:3px 9px;border-radius:10px;color:#fff;margin-right:8px;}
+.filter-row{display:flex;gap:8px;margin-bottom:16px;}
+.field{position:relative;}
+.autocomplete-list{
+  position:absolute;z-index:30;background:#fff;border:1px solid #c9b98e;border-radius:6px;
+  margin-top:2px;max-height:230px;overflow-y:auto;width:100%;
+  box-shadow:0 6px 16px rgba(0,0,0,0.18);
+}
+.autocomplete-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee2c8;}
+.autocomplete-item:last-child{border-bottom:none;}
+.autocomplete-item:hover{background:#f3e8cc;}
+.autocomplete-item .ac-name{font-size:13.5px;color:var(--ink);font-weight:600;}
+.autocomplete-item .ac-sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
+.field-hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+.hist-toolbar{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
+.hist-search{
+  flex:1;border:1px solid #c9b98e;background:#fbf6ea;border-radius:7px;
+  padding:11px 14px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);
+}
+.hist-search:focus{outline:2px solid var(--gold);outline-offset:1px;}
+@media(max-width:560px){.hist-toolbar{flex-direction:column;align-items:stretch;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand-row">
+    <div class="brand">
+      <div class="brand-mark">BAMA</div>
+      <div class="brand-text">
+        <p class="display">Bama Bourbon &amp; Cigars</p>
+        <div class="sub">TASTING DASHBOARD</div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="bourbon">Bourbon</button>
+    <button class="tab" data-tab="cigar">Cigar</button>
+    <button class="tab" data-tab="history">History</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ BOURBON PANEL ============ -->
+  <div class="panel active" id="panel-bourbon">
+
+    <div class="section">
+      <h3>Bottle Details</h3>
+      <div class="grid-3" id="b-details"></div>
+      <div style="margin-top:14px;">
+        <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Sampled As</label>
+        <div class="check-row" id="b-sampled"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Bourbon Flavor Wheel — tap all that apply</h3>
+      <div class="wheel-grid" id="b-wheel"></div>
+      <div class="selected-summary" id="b-wheel-summary">No flavors selected yet.</div>
+    </div>
+
+    <div class="section">
+      <h3>Appearance</h3>
+      <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Color</label>
+      <div class="swatch-row" id="b-color"></div>
+      <div class="grid-2" style="margin-top:16px;">
+        <div>
+          <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Clarity</label>
+          <div class="radio-pill-row" id="b-clarity"></div>
+        </div>
+        <div>
+          <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Legs / Tears</label>
+          <div class="radio-pill-row" id="b-legs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Aroma &amp; Palate</h3>
+      <div class="rating-row"><div class="rlabel">Nose Intensity</div><div class="dots" id="b-nose-int"></div></div>
+      <div class="field" style="margin-bottom:16px;"><label>Aroma Notes</label><textarea id="b-nose-notes"></textarea></div>
+      <div class="rating-row"><div class="rlabel">Palate Intensity</div><div class="dots" id="b-palate-int"></div></div>
+      <div class="field"><label>Flavor Notes</label><textarea id="b-palate-notes"></textarea></div>
+    </div>
+
+    <div class="section">
+      <h3>Finish &amp; Overall</h3>
+      <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Finish Length</label>
+      <div class="radio-pill-row" id="b-finish-len" style="margin-bottom:10px;"></div>
+      <div class="field" style="margin-bottom:16px;"><label>Finish Notes</label><textarea id="b-finish-notes"></textarea></div>
+      <div class="rating-row"><div class="rlabel">Enjoyment</div><div class="stars" id="b-stars"></div></div>
+      <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Would I Buy Again?</label>
+      <div class="radio-pill-row" id="b-buy" style="margin-bottom:10px;"></div>
+      <div class="field"><label>Why?</label><textarea id="b-why"></textarea></div>
+    </div>
+
+    <div class="section">
+      <h3>Bama Bourbon Score</h3>
+      <div id="b-scores"></div>
+      <div class="total-box"><div class="num" id="b-total">0/100</div><div class="lbl">FINAL SCORE</div></div>
+    </div>
+
+    <div class="save-bar">
+      <span class="save-msg" id="b-save-msg"></span>
+      <button class="btn btn-ghost" onclick="clearForm('bourbon')">Clear Form</button>
+      <button class="btn btn-primary" onclick="saveEntry('bourbon')">Save Tasting</button>
+    </div>
+  </div>
+
+  <!-- ============ CIGAR PANEL ============ -->
+  <div class="panel" id="panel-cigar">
+
+    <div class="section">
+      <h3>Cigar Details</h3>
+      <div class="grid-3" id="c-details"></div>
+    </div>
+
+    <div class="section">
+      <h3>Cigar Flavor Wheel — tap all that apply</h3>
+      <div class="wheel-grid" id="c-wheel"></div>
+      <div class="selected-summary" id="c-wheel-summary">No flavors selected yet.</div>
+    </div>
+
+    <div class="section">
+      <h3>Pre-Light Notes</h3>
+      <div class="rating-row"><div class="rlabel">Appearance</div><div class="stars" id="c-appearance"></div></div>
+      <div class="rating-row"><div class="rlabel">Construction</div><div class="stars" id="c-construction"></div></div>
+      <div class="field"><label>Pre-Light Aroma</label><textarea id="c-prelight-aroma"></textarea></div>
+    </div>
+
+    <div class="section">
+      <h3>Smoking Experience</h3>
+      <div class="grid-3">
+        <div>
+          <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">First Third</label>
+          <div class="field" style="margin:8px 0;"><textarea id="c-first-flavor" placeholder="Flavor"></textarea></div>
+          <div class="dots" id="c-first-strength"></div>
+          <div class="field" style="margin-top:8px;"><textarea id="c-first-notes" placeholder="Notes"></textarea></div>
+        </div>
+        <div>
+          <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Second Third</label>
+          <div class="field" style="margin:8px 0;"><textarea id="c-second-flavor" placeholder="Flavor"></textarea></div>
+          <div class="dots" id="c-second-strength"></div>
+          <div class="field" style="margin-top:8px;"><textarea id="c-second-notes" placeholder="Notes"></textarea></div>
+        </div>
+        <div>
+          <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Final Third</label>
+          <div class="field" style="margin:8px 0;"><textarea id="c-final-flavor" placeholder="Flavor"></textarea></div>
+          <div class="dots" id="c-final-strength"></div>
+          <div class="field" style="margin-top:8px;"><textarea id="c-final-notes" placeholder="Notes"></textarea></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Overall Ratings</h3>
+      <div class="rating-row"><div class="rlabel">Strength</div><div class="dots" id="c-strength"></div></div>
+      <div class="rating-row"><div class="rlabel">Complexity</div><div class="dots" id="c-complexity"></div></div>
+      <div class="rating-row"><div class="rlabel">Smoke Output</div><div class="dots" id="c-smoke"></div></div>
+      <div class="rating-row"><div class="rlabel">Draw</div><div class="dots" id="c-draw"></div></div>
+      <div class="rating-row"><div class="rlabel">Burn</div><div class="dots" id="c-burn"></div></div>
+    </div>
+
+    <div class="section">
+      <h3>Smoke Details &amp; Impression</h3>
+      <div class="grid-3" id="c-smokedetails"></div>
+      <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;margin-top:12px;display:block;">Re-Lights</label>
+      <div class="radio-pill-row" id="c-relights" style="margin-bottom:14px;"></div>
+      <label style="font-size:12.5px;color:var(--ink-soft);font-weight:600;">Pairing Type</label>
+      <div class="radio-pill-row" id="c-pairtype" style="margin-bottom:14px;"></div>
+      <div class="field"><label>Overall Impression</label><textarea id="c-impression"></textarea></div>
+    </div>
+
+    <div class="section">
+      <h3>Bama Pairing Score</h3>
+      <div id="c-scores"></div>
+      <div class="total-box"><div class="num" id="c-total">0/100</div><div class="lbl">FINAL SCORE</div></div>
+    </div>
+
+    <div class="save-bar">
+      <span class="save-msg" id="c-save-msg"></span>
+      <button class="btn btn-ghost" onclick="clearForm('cigar')">Clear Form</button>
+      <button class="btn btn-primary" onclick="saveEntry('cigar')">Save Tasting</button>
+    </div>
+  </div>
+
+  <!-- ============ HISTORY PANEL ============ -->
+  <div class="panel" id="panel-history">
+    <div class="hist-toolbar">
+      <input type="text" id="hist-search" class="hist-search" placeholder="Search by name, distillery, brand, or flavor…" oninput="setHistSearch(this.value)">
+      <button class="btn btn-primary" style="padding:10px 18px;font-size:13px;" onclick="exportCSV()">Export CSV</button>
+    </div>
+    <div class="filter-row">
+      <button class="radio-pill sel" data-hist-filter="all" onclick="setHistFilter('all')">All</button>
+      <button class="radio-pill" data-hist-filter="bourbon" onclick="setHistFilter('bourbon')">Bourbon</button>
+      <button class="radio-pill" data-hist-filter="cigar" onclick="setHistFilter('cigar')">Cigar</button>
+    </div>
+    <div id="hist-list"></div>
+  </div>
+
+</main>
+
+<script>
+/* ---------------- storage shim (works standalone outside Claude.ai) ---------------- */
+if(!window.storage){
+  window.storage = {
+    async get(key, shared){
+      const raw = localStorage.getItem('bama:'+key);
+      if(raw===null) throw new Error('not found');
+      return {key, value: raw, shared: !!shared};
+    },
+    async set(key, value, shared){
+      localStorage.setItem('bama:'+key, value);
+      return {key, value, shared: !!shared};
+    },
+    async delete(key, shared){
+      localStorage.removeItem('bama:'+key);
+      return {key, deleted:true, shared: !!shared};
+    },
+    async list(prefix, shared){
+      const keys=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k = localStorage.key(i);
+        if(k && k.startsWith('bama:')){
+          const stripped = k.slice(5);
+          if(!prefix || stripped.startsWith(prefix)) keys.push(stripped);
+        }
+      }
+      return {keys, prefix, shared: !!shared};
+    }
+  };
+}
+
+/* ---------------- helpers ---------------- */
+function el(tag, cls, html){const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e;}
+
+function buildTextFields(containerId, fields){
+  const c = document.getElementById(containerId);
+  fields.forEach(f=>{
+    const wrap = el('div','field');
+    wrap.appendChild(el('label',null,f.label));
+    const input = f.type==='textarea' ? el('textarea') : document.createElement('input');
+    if(f.type!=='textarea') input.type = f.type || 'text';
+    input.id = f.id;
+    if(f.placeholder) input.placeholder = f.placeholder;
+    wrap.appendChild(input);
+    c.appendChild(wrap);
+  });
+}
+
+function buildCheckRow(containerId, options, idPrefix){
+  const c = document.getElementById(containerId);
+  options.forEach(o=>{
+    const lbl = el('label');
+    const cb = document.createElement('input');
+    cb.type='checkbox'; cb.id = idPrefix+'-'+o.toLowerCase().replace(/\s+/g,'-');
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(' '+o));
+    c.appendChild(lbl);
+  });
+}
+
+function buildPillRow(containerId, options, groupName, multi){
+  const c = document.getElementById(containerId);
+  c.dataset.group = groupName;
+  c.dataset.multi = multi ? '1':'0';
+  options.forEach(o=>{
+    const p = el('div','radio-pill', o);
+    p.dataset.value = o;
+    p.onclick = ()=>{
+      if(multi){ p.classList.toggle('sel'); }
+      else { [...c.children].forEach(x=>x.classList.remove('sel')); p.classList.add('sel'); }
+    };
+    c.appendChild(p);
+  });
+}
+
+function buildSwatches(containerId, swatches){
+  const c = document.getElementById(containerId);
+  swatches.forEach(s=>{
+    const wrap = el('div','swatch-wrap');
+    const sw = el('div','swatch');
+    sw.style.background = s.hex;
+    sw.dataset.value = s.name;
+    sw.onclick = ()=>{ [...c.querySelectorAll('.swatch')].forEach(x=>x.classList.remove('sel')); sw.classList.add('sel'); };
+    wrap.appendChild(sw);
+    wrap.appendChild(el('div','swatch-label', s.name));
+    c.appendChild(wrap);
+  });
+}
+
+function buildDots(containerId, max){
+  const c = document.getElementById(containerId);
+  for(let i=1;i<=max;i++){
+    const d = el('div','dot');
+    d.dataset.value=i;
+    d.onclick = ()=>{
+      const dots=[...c.children];
+      const already = d.classList.contains('active') && (i===Number(c.dataset.current));
+      dots.forEach((x,idx)=> x.classList.toggle('active', !already && idx < i));
+      c.dataset.current = already ? 0 : i;
+    };
+    c.appendChild(d);
+  }
+}
+
+function buildStars(containerId, max){
+  const c = document.getElementById(containerId);
+  for(let i=1;i<=max;i++){
+    const s = el('div','star','★');
+    s.dataset.value=i;
+    s.onclick = ()=>{
+      const stars=[...c.children];
+      const already = Number(c.dataset.current)===i;
+      stars.forEach((x,idx)=> x.classList.toggle('active', !already && idx < i));
+      c.dataset.current = already ? 0 : i;
+    };
+    c.appendChild(s);
+  }
+}
+
+function getDotValue(id){ return Number(document.getElementById(id).dataset.current||0); }
+function getStarValue(id){ return Number(document.getElementById(id).dataset.current||0); }
+function getPillValue(id){
+  const c=document.getElementById(id);
+  if(c.dataset.multi==='1') return [...c.querySelectorAll('.sel')].map(x=>x.dataset.value);
+  const sel=c.querySelector('.sel'); return sel? sel.dataset.value : '';
+}
+function getSwatchValue(id){ const sel=document.getElementById(id).querySelector('.sel'); return sel? sel.dataset.value:''; }
+
+function buildWheel(containerId, summaryId, categories){
+  const c = document.getElementById(containerId);
+  categories.forEach(cat=>{
+    const card = el('div','category');
+    card.style.borderColor = cat.color;
+    const head = el('div','category-head', cat.name);
+    head.style.background = cat.color;
+    const body = el('div','category-body');
+    cat.options.forEach(opt=>{
+      const chip = el('div','chip', opt);
+      chip.dataset.value = opt;
+      chip.dataset.cat = cat.name;
+      chip.onclick = ()=>{
+        chip.classList.toggle('selected');
+        chip.style.background = chip.classList.contains('selected') ? cat.color : '#fff';
+        chip.style.borderColor = chip.classList.contains('selected') ? cat.color : '#c9b98e';
+        updateWheelSummary(containerId, summaryId);
+      };
+      body.appendChild(chip);
+    });
+    card.appendChild(head); card.appendChild(body);
+    c.appendChild(card);
+  });
+}
+function updateWheelSummary(containerId, summaryId){
+  const sel = [...document.getElementById(containerId).querySelectorAll('.chip.selected')].map(c=>c.dataset.value);
+  const s = document.getElementById(summaryId);
+  s.innerHTML = sel.length ? '<b>Selected:</b> '+sel.join(', ') : 'No flavors selected yet.';
+}
+function getWheelValues(containerId){
+  return [...document.getElementById(containerId).querySelectorAll('.chip.selected')].map(c=>c.dataset.value);
+}
+
+function buildScoreSliders(containerId, totalId, rows){
+  const c = document.getElementById(containerId);
+  rows.forEach(r=>{
+    const row = el('div','score-row');
+    row.appendChild(el('div','slabel', r));
+    const input = document.createElement('input');
+    input.type='range'; input.min=0; input.max=20; input.value=0;
+    input.id = containerId+'-'+r.toLowerCase().replace(/\s+/g,'-');
+    const val = el('div','sval','0');
+    input.oninput = ()=>{ val.textContent = input.value; updateTotal(containerId, totalId); };
+    row.appendChild(input); row.appendChild(val);
+    c.appendChild(row);
+  });
+}
+function updateTotal(containerId, totalId){
+  const inputs = [...document.getElementById(containerId).querySelectorAll('input[type=range]')];
+  const total = inputs.reduce((a,i)=>a+Number(i.value),0);
+  document.getElementById(totalId).textContent = total+'/100';
+}
+function getScoreValues(containerId){
+  const inputs = [...document.getElementById(containerId).querySelectorAll('input[type=range]')];
+  const obj={};
+  inputs.forEach(i=>{ obj[i.id]=Number(i.value); });
+  return obj;
+}
+
+/* ---------------- build Bourbon form ---------------- */
+buildTextFields('b-details', [
+  {id:'b-name', label:'Bourbon / Whiskey'},
+  {id:'b-distillery', label:'Distillery'},
+  {id:'b-style', label:'Style'},
+  {id:'b-age', label:'Age'},
+  {id:'b-proof', label:'Proof'},
+  {id:'b-mashbill', label:'Mash Bill'},
+  {id:'b-barreltype', label:'Barrel Type'},
+  {id:'b-entryproof', label:'Barrel Entry Proof'},
+  {id:'b-bottled', label:'Date Bottled', type:'date'},
+  {id:'b-price', label:'Price ($)', type:'number'},
+  {id:'b-batch', label:'Batch / Lot #'},
+  {id:'b-glassware', label:'Glassware'},
+  {id:'b-purchased', label:'Purchased At'},
+  {id:'b-location', label:'Location'},
+  {id:'b-occasion', label:'Occasion'},
+]);
+buildCheckRow('b-sampled', ['Neat','Rocks','With Water','Cocktail'], 'b-sampled');
+
+/* ---- bourbon reference library + autocomplete ---- */
+const BOURBON_DB = [
+  {name:"Buffalo Trace", distillery:"Buffalo Trace Distillery", style:"Straight Bourbon", proof:"90"},
+  {name:"Eagle Rare 10 Year", distillery:"Buffalo Trace Distillery", style:"Single Barrel Bourbon", proof:"90", age:"10"},
+  {name:"Blanton's Original Single Barrel", distillery:"Buffalo Trace Distillery", style:"Single Barrel Bourbon", proof:"93"},
+  {name:"W.L. Weller Special Reserve", distillery:"Buffalo Trace Distillery", style:"Wheated Bourbon", proof:"90"},
+  {name:"Weller Antique 107", distillery:"Buffalo Trace Distillery", style:"Wheated Bourbon", proof:"107"},
+  {name:"Pappy Van Winkle's Family Reserve 15 Year", distillery:"Buffalo Trace Distillery", style:"Wheated Bourbon", proof:"107", age:"15"},
+  {name:"E.H. Taylor Small Batch", distillery:"Buffalo Trace Distillery", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Colonel E.H. Taylor Barrel Proof", distillery:"Buffalo Trace Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"George T. Stagg", distillery:"Buffalo Trace Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Stagg Jr.", distillery:"Buffalo Trace Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Ancient Age", distillery:"Buffalo Trace Distillery", style:"Bourbon", proof:"90"},
+  {name:"Maker's Mark", distillery:"Maker's Mark Distillery", style:"Wheated Bourbon", proof:"90"},
+  {name:"Maker's Mark 46", distillery:"Maker's Mark Distillery", style:"Wheated Bourbon", proof:"94"},
+  {name:"Woodford Reserve", distillery:"Woodford Reserve Distillery", style:"Straight Bourbon", proof:"90.4"},
+  {name:"Woodford Reserve Double Oaked", distillery:"Woodford Reserve Distillery", style:"Bourbon", proof:"90.4"},
+  {name:"Four Roses Small Batch", distillery:"Four Roses Distillery", style:"Small Batch Bourbon", proof:"90"},
+  {name:"Four Roses Single Barrel", distillery:"Four Roses Distillery", style:"Single Barrel Bourbon", proof:"100"},
+  {name:"Wild Turkey 101", distillery:"Wild Turkey Distillery", style:"Straight Bourbon", proof:"101"},
+  {name:"Wild Turkey Rare Breed", distillery:"Wild Turkey Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Russell's Reserve 10 Year", distillery:"Wild Turkey Distillery", style:"Small Batch Bourbon", proof:"90", age:"10"},
+  {name:"Russell's Reserve Single Barrel", distillery:"Wild Turkey Distillery", style:"Single Barrel Bourbon", proof:"110"},
+  {name:"Knob Creek", distillery:"Jim Beam", style:"Small Batch Bourbon", proof:"100", age:"9"},
+  {name:"Knob Creek Single Barrel Reserve", distillery:"Jim Beam", style:"Single Barrel Bourbon", proof:"120"},
+  {name:"Booker's", distillery:"Jim Beam", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Baker's", distillery:"Jim Beam", style:"Small Batch Bourbon", proof:"107", age:"7"},
+  {name:"Basil Hayden's", distillery:"Jim Beam", style:"Bourbon", proof:"80"},
+  {name:"Jim Beam White Label", distillery:"Jim Beam", style:"Bourbon", proof:"80"},
+  {name:"Old Grand-Dad 114", distillery:"Jim Beam", style:"Bourbon", proof:"114"},
+  {name:"Elijah Craig Small Batch", distillery:"Heaven Hill Distillery", style:"Small Batch Bourbon", proof:"94"},
+  {name:"Elijah Craig Barrel Proof", distillery:"Heaven Hill Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Evan Williams Black Label", distillery:"Heaven Hill Distillery", style:"Bourbon", proof:"86"},
+  {name:"Evan Williams Bottled-in-Bond", distillery:"Heaven Hill Distillery", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Larceny", distillery:"Heaven Hill Distillery", style:"Wheated Bourbon", proof:"92"},
+  {name:"Henry McKenna Single Barrel 10 Year", distillery:"Heaven Hill Distillery", style:"Bottled-in-Bond Bourbon", proof:"100", age:"10"},
+  {name:"Heaven Hill Bottled-in-Bond", distillery:"Heaven Hill Distillery", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Fighting Cock", distillery:"Heaven Hill Distillery", style:"Bourbon", proof:"103"},
+  {name:"Old Forester 86", distillery:"Brown-Forman", style:"Bourbon", proof:"86"},
+  {name:"Old Forester 100 Proof", distillery:"Brown-Forman", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Old Forester 1920 Prohibition Style", distillery:"Brown-Forman", style:"Barrel Strength Bourbon", proof:""},
+  {name:"Old Forester Statesman", distillery:"Brown-Forman", style:"Barrel Strength Bourbon", proof:""},
+  {name:"1792 Small Batch", distillery:"Barton 1792 Distillery", style:"Small Batch Bourbon", proof:"93.7"},
+  {name:"1792 Full Proof", distillery:"Barton 1792 Distillery", style:"Full Proof Bourbon", proof:"125"},
+  {name:"Very Old Barton", distillery:"Barton 1792 Distillery", style:"Bourbon", proof:""},
+  {name:"Bulleit Bourbon", distillery:"Bulleit Distilling Co.", style:"High Rye Bourbon", proof:"90"},
+  {name:"Angel's Envy", distillery:"Angel's Envy Distillery", style:"Port Barrel Finished Bourbon", proof:"86.6"},
+  {name:"Michter's US*1 Bourbon", distillery:"Michter's Distillery", style:"Small Batch Bourbon", proof:"91.4"},
+  {name:"Willett Pot Still Reserve", distillery:"Willett Distillery", style:"Bourbon", proof:"94"},
+  {name:"Noah's Mill", distillery:"Willett Distillery", style:"Barrel Proof Bourbon", proof:"114.3"},
+  {name:"Rowan's Creek", distillery:"Willett Distillery", style:"Bourbon", proof:"100.1"},
+  {name:"Rebel Yell", distillery:"Lux Row Distillers", style:"Wheated Bourbon", proof:"80"},
+  {name:"Old Ezra 7 Year Barrel Strength", distillery:"Lux Row Distillers", style:"Barrel Proof Bourbon", age:"7"},
+  {name:"Jefferson's Ocean", distillery:"Jefferson's Bourbon", style:"Bourbon", proof:"90"},
+];
+
+function setupBourbonAutocomplete(){
+  const input = document.getElementById('b-name');
+  const wrap = input.closest('.field');
+  const hint = el('div','field-hint','Suggestions are typical reference values — confirm against your actual bottle/batch.');
+  wrap.appendChild(hint);
+  const list = el('div','autocomplete-list');
+  list.style.display='none';
+  wrap.appendChild(list);
+
+  function renderMatches(q){
+    const matches = BOURBON_DB.filter(b=>b.name.toLowerCase().includes(q)).slice(0,8);
+    if(!matches.length){ list.style.display='none'; list.innerHTML=''; return; }
+    list.innerHTML='';
+    matches.forEach(m=>{
+      const item = el('div','autocomplete-item');
+      const subParts = [m.distillery, m.style, m.proof?m.proof+' proof':'', m.age?m.age+' yr':''].filter(Boolean).join(' · ');
+      item.innerHTML = `<div class="ac-name">${m.name}</div><div class="ac-sub">${subParts}</div>`;
+      item.onclick = ()=>{
+        input.value = m.name;
+        if(m.distillery) document.getElementById('b-distillery').value = m.distillery;
+        if(m.style) document.getElementById('b-style').value = m.style;
+        if(m.proof) document.getElementById('b-proof').value = m.proof;
+        if(m.age) document.getElementById('b-age').value = m.age;
+        list.style.display='none'; list.innerHTML='';
+      };
+      list.appendChild(item);
+    });
+    list.style.display='block';
+  }
+
+  input.addEventListener('input', ()=>{
+    const q = input.value.trim().toLowerCase();
+    if(q.length<2){ list.style.display='none'; list.innerHTML=''; return; }
+    renderMatches(q);
+  });
+  document.addEventListener('click', (e)=>{
+    if(!wrap.contains(e.target)) list.style.display='none';
+  });
+}
+setupBourbonAutocomplete();
+
+buildWheel('b-wheel','b-wheel-summary',[
+  {name:'SPICE', color:'var(--spice)', options:['Cinnamon','Nutmeg','Black Pepper','Rye Spice','Ginger']},
+  {name:'OAK', color:'var(--oak)', options:['Oak','Vanilla','Caramel','Toasted Oak','Baking Spice','Tannin','Wood Smoke']},
+  {name:'FRUIT', color:'var(--fruit)', options:['Dried Fruit','Dark Fruit','Citrus','Apple','Berry','Stone Fruit']},
+  {name:'SWEET', color:'var(--sweet)', options:['Caramel','Brown Sugar','Butterscotch','Clover Honey','Honey','Maple']},
+  {name:'GRAIN', color:'var(--grain)', options:['Bready','Malt','Rye','Barley','Corn','Molasses']},
+  {name:'NUT', color:'var(--nut)', options:['Almond','Walnut','Pecan','Hazelnut','Peanut','Chestnut']},
+]);
+
+buildSwatches('b-color', [
+  {name:'Pale Straw', hex:'#f2e2a0'},
+  {name:'Gold', hex:'#e0b23c'},
+  {name:'Amber', hex:'#c9852a'},
+  {name:'Copper', hex:'#b06426'},
+  {name:'Mahogany', hex:'#7a3a1f'},
+  {name:'Dark Rust', hex:'#5c2a18'},
+]);
+buildPillRow('b-clarity', ['Clear','Slight Haze','Hazy'], 'clarity', false);
+buildPillRow('b-legs', ['Light','Medium','Heavy'], 'legs', false);
+buildDots('b-nose-int',5);
+buildDots('b-palate-int',5);
+buildPillRow('b-finish-len', ['Short','Medium','Long','Very Long'], 'finishlen', false);
+buildStars('b-stars',5);
+buildPillRow('b-buy', ['Yes','Maybe','No'], 'buy', false);
+buildScoreSliders('b-scores','b-total', ['Aroma','Flavor','Finish','Balance','Overall Enjoyment']);
+
+/* ---------------- build Cigar form ---------------- */
+buildTextFields('c-details', [
+  {id:'c-brand', label:'Company / Brand'},
+  {id:'c-name', label:'Cigar Name'},
+  {id:'c-size', label:'Size'},
+  {id:'c-ring', label:'Ring Gauge'},
+  {id:'c-length', label:'Length'},
+  {id:'c-shape', label:'Shape'},
+  {id:'c-wrapper', label:'Wrapper'},
+  {id:'c-binder', label:'Binder'},
+  {id:'c-filler', label:'Filler'},
+  {id:'c-origin', label:'Country of Origin'},
+  {id:'c-price', label:'Price ($)', type:'number'},
+  {id:'c-purchased', label:'Purchased At'},
+  {id:'c-batch', label:'Batch / Code'},
+  {id:'c-location', label:'Location'},
+]);
+
+buildWheel('c-wheel','c-wheel-summary',[
+  {name:'SPICE', color:'var(--spice)', options:['Black Pepper','White Pepper','Red Pepper','Cinnamon','Clove','Nutmeg']},
+  {name:'WOOD', color:'var(--wood)', options:['Cedar','Oak','Sandalwood','Pine','Charred Wood']},
+  {name:'EARTH', color:'var(--earth)', options:['Earthy','Mineral','Moss','Grass','Barnyard']},
+  {name:'SWEET', color:'var(--sweet)', options:['Cream','Molasses','Brown Sugar','Caramel','Cocoa','Maple','Marzipan']},
+  {name:'NUTS', color:'var(--nut)', options:['Peanut','Cashew','Walnut','Hazelnut','Almond']},
+  {name:'LEATHER', color:'var(--leather)', options:['Espresso','Coffee','Dark Chocolate','Leather']},
+]);
+
+buildStars('c-appearance',5);
+buildStars('c-construction',5);
+buildDots('c-first-strength',5);
+buildDots('c-second-strength',5);
+buildDots('c-final-strength',5);
+buildDots('c-strength',5);
+buildDots('c-complexity',5);
+buildDots('c-smoke',5);
+buildDots('c-draw',5);
+buildDots('c-burn',5);
+
+buildTextFields('c-smokedetails', [
+  {id:'c-smoketime', label:'Smoke Time (minutes)', type:'number'},
+  {id:'c-starttime', label:'Start Time'},
+  {id:'c-endtime', label:'End Time'},
+]);
+buildPillRow('c-relights', ['0','1','2','3+'], 'relights', false);
+buildPillRow('c-pairtype', ['Drink','Coffee','Food'], 'pairtype', false);
+buildScoreSliders('c-scores','c-total', ['Flavor Harmony','Body Balance','Finish Compatibility','Complexity','Overall Enjoyment']);
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='history') renderHistory();
+  };
+});
+
+/* ---------------- collect / save / clear ---------------- */
+function val(id){ const e=document.getElementById(id); return e?e.value:''; }
+
+function collectBourbon(){
+  return {
+    type:'bourbon',
+    savedAt:new Date().toISOString(),
+    name: val('b-name'), distillery: val('b-distillery'), style: val('b-style'),
+    age: val('b-age'), proof: val('b-proof'), mashbill: val('b-mashbill'),
+    barreltype: val('b-barreltype'), entryproof: val('b-entryproof'), bottled: val('b-bottled'),
+    price: val('b-price'), batch: val('b-batch'), glassware: val('b-glassware'),
+    purchased: val('b-purchased'), location: val('b-location'), occasion: val('b-occasion'),
+    sampled: ['neat','rocks','with-water','cocktail'].filter(s=>document.getElementById('b-sampled-'+s)?.checked)
+      .map(s=>({neat:'Neat',rocks:'Rocks','with-water':'With Water',cocktail:'Cocktail'}[s])),
+    flavors: getWheelValues('b-wheel'),
+    color: getSwatchValue('b-color'),
+    clarity: getPillValue('b-clarity'),
+    legs: getPillValue('b-legs'),
+    noseIntensity: getDotValue('b-nose-int'),
+    noseNotes: val('b-nose-notes'),
+    palateIntensity: getDotValue('b-palate-int'),
+    palateNotes: val('b-palate-notes'),
+    finishLength: getPillValue('b-finish-len'),
+    finishNotes: val('b-finish-notes'),
+    enjoyment: getStarValue('b-stars'),
+    buyAgain: getPillValue('b-buy'),
+    why: val('b-why'),
+    scores: getScoreValues('b-scores'),
+    total: document.getElementById('b-total').textContent,
+  };
+}
+function collectCigar(){
+  return {
+    type:'cigar',
+    savedAt:new Date().toISOString(),
+    brand: val('c-brand'), name: val('c-name'), size: val('c-size'), ring: val('c-ring'),
+    length: val('c-length'), shape: val('c-shape'), wrapper: val('c-wrapper'), binder: val('c-binder'),
+    filler: val('c-filler'), origin: val('c-origin'), price: val('c-price'), purchased: val('c-purchased'),
+    batch: val('c-batch'), location: val('c-location'),
+    flavors: getWheelValues('c-wheel'),
+    appearance: getStarValue('c-appearance'),
+    construction: getStarValue('c-construction'),
+    prelightAroma: val('c-prelight-aroma'),
+    firstFlavor: val('c-first-flavor'), firstStrength: getDotValue('c-first-strength'), firstNotes: val('c-first-notes'),
+    secondFlavor: val('c-second-flavor'), secondStrength: getDotValue('c-second-strength'), secondNotes: val('c-second-notes'),
+    finalFlavor: val('c-final-flavor'), finalStrength: getDotValue('c-final-strength'), finalNotes: val('c-final-notes'),
+    strength: getDotValue('c-strength'), complexity: getDotValue('c-complexity'), smoke: getDotValue('c-smoke'),
+    draw: getDotValue('c-draw'), burn: getDotValue('c-burn'),
+    smoketime: val('c-smoketime'), starttime: val('c-starttime'), endtime: val('c-endtime'),
+    relights: getPillValue('c-relights'), pairtype: getPillValue('c-pairtype'),
+    impression: val('c-impression'),
+    scores: getScoreValues('c-scores'),
+    total: document.getElementById('c-total').textContent,
+  };
+}
+
+async function saveEntry(kind){
+  const data = kind==='bourbon' ? collectBourbon() : collectCigar();
+  const key = kind+':'+Date.now();
+  const msgEl = document.getElementById(kind==='bourbon'?'b-save-msg':'c-save-msg');
+  try{
+    const res = await window.storage.set(key, JSON.stringify(data), false);
+    if(res){
+      msgEl.textContent = 'Saved ✓ — resetting for your next tasting…';
+      setTimeout(()=>{
+        clearForm(kind);
+        msgEl.textContent = '';
+      }, 1300);
+    } else {
+      msgEl.textContent = 'Save failed — try again.';
+      setTimeout(()=>{msgEl.textContent='';}, 3000);
+    }
+  }catch(e){
+    msgEl.textContent = 'Save failed — try again.';
+    setTimeout(()=>{msgEl.textContent='';}, 3000);
+  }
+}
+
+function clearForm(kind){
+  const panel = document.getElementById(kind==='bourbon'?'panel-bourbon':'panel-cigar');
+  panel.querySelectorAll('input[type=text],input[type=number],input[type=date],textarea').forEach(i=>i.value='');
+  panel.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=false);
+  panel.querySelectorAll('.chip.selected').forEach(c=>{c.classList.remove('selected'); c.style.background='#fff'; c.style.borderColor='#c9b98e';});
+  panel.querySelectorAll('.swatch.sel,.radio-pill.sel,.dot.active,.star.active').forEach(x=>x.classList.remove('sel','active'));
+  panel.querySelectorAll('.dots,.stars').forEach(x=>x.dataset.current=0);
+  panel.querySelectorAll('.selected-summary').forEach(s=>s.textContent='No flavors selected yet.');
+  panel.querySelectorAll('input[type=range]').forEach(r=>{r.value=0; r.nextSibling && (r.nextSibling.textContent='0');});
+  document.getElementById(kind==='bourbon'?'b-total':'c-total').textContent='0/100';
+}
+
+/* ---------------- history ---------------- */
+let histFilter='all';
+let histSearch='';
+let histEntriesCache=[];
+
+function setHistFilter(f){
+  histFilter=f;
+  document.querySelectorAll('[data-hist-filter]').forEach(b=>b.classList.toggle('sel', b.dataset.histFilter===f));
+  renderHistory();
+}
+function setHistSearch(v){
+  histSearch=v.trim().toLowerCase();
+  renderHistory();
+}
+
+function matchesSearch(data, q){
+  if(!q) return true;
+  const haystack = [
+    data.name, data.distillery, data.brand, data.style, data.shape,
+    data.wrapper, data.origin, data.location, data.purchased,
+    data.noseNotes, data.palateNotes, data.finishNotes, data.why, data.impression,
+    ...(data.flavors||[])
+  ].filter(Boolean).join(' ').toLowerCase();
+  return haystack.includes(q);
+}
+
+function getFilteredEntries(){
+  let entries = histEntriesCache.slice();
+  entries = histFilter==='all' ? entries : entries.filter(e=>e.data.type===histFilter);
+  entries = entries.filter(e=>matchesSearch(e.data, histSearch));
+  return entries;
+}
+
+async function renderHistory(){
+  const list = document.getElementById('hist-list');
+  list.innerHTML = '<div class="empty-state">Loading…</div>';
+  try{
+    const res = await window.storage.list('', false);
+    const keys = (res && res.keys) ? res.keys.filter(k=>k.startsWith('bourbon:')||k.startsWith('cigar:')) : [];
+    if(!keys.length){
+      list.innerHTML = '<div class="empty-state"><div class="display">No tastings saved yet</div>Fill out a Bourbon or Cigar note and hit Save Tasting.</div>';
+      histEntriesCache=[];
+      return;
+    }
+    const entries = [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, false);
+        if(r) entries.push({key:k, data: JSON.parse(r.value)});
+      }catch(e){}
+    }
+    entries.sort((a,b)=> new Date(b.data.savedAt) - new Date(a.data.savedAt));
+    histEntriesCache = entries;
+    const filtered = getFilteredEntries();
+    if(!filtered.length){
+      list.innerHTML = '<div class="empty-state"><div class="display">Nothing here yet</div>Try a different filter or search term.</div>';
+      return;
+    }
+    list.innerHTML='';
+    filtered.forEach(({key,data})=>{
+      const card = el('div','hist-card');
+      const pillColor = data.type==='bourbon' ? 'var(--gold)' : 'var(--leather)';
+      const title = data.type==='bourbon' ? (data.name||'Untitled Bourbon') : (data.name||'Untitled Cigar');
+      const sub = data.type==='bourbon' ? [data.distillery,data.style].filter(Boolean).join(' · ') : [data.brand,data.size].filter(Boolean).join(' · ');
+      const dateStr = new Date(data.savedAt).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+      card.innerHTML = `
+        <div class="hist-top">
+          <div>
+            <span class="type-pill" style="background:${pillColor}">${data.type.toUpperCase()}</span>
+            <div class="hist-title" style="display:inline;">${title}</div>
+            <div class="hist-meta">${sub}${sub?' · ':''}${dateStr}</div>
+          </div>
+          <div class="hist-score">${data.total||'0/100'}</div>
+        </div>
+        <div class="hist-tags">${(data.flavors||[]).map(f=>`<span class="hist-tag">${f}</span>`).join('')}</div>
+      `;
+      const actions = el('div','hist-actions');
+      const del = document.createElement('button');
+      del.textContent='Delete';
+      del.onclick = async ()=>{
+        try{
+          const r = await window.storage.get(key, false);
+          await window.storage.delete(key, false);
+          renderHistory();
+        }catch(e){ renderHistory(); }
+      };
+      actions.appendChild(del);
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+  }catch(e){
+    list.innerHTML = '<div class="empty-state">Could not load saved tastings.</div>';
+  }
+}
+
+/* ---------------- CSV export ---------------- */
+function csvEscape(v){
+  const s = (v===undefined||v===null) ? '' : String(v);
+  return '"'+s.replace(/"/g,'""')+'"';
+}
+
+function entryToRow(data){
+  const isBourbon = data.type==='bourbon';
+  return {
+    'Type': data.type,
+    'Name': data.name || '',
+    'Brand / Distillery': isBourbon ? (data.distillery||'') : (data.brand||''),
+    'Style / Shape': isBourbon ? (data.style||'') : (data.shape||''),
+    'Size / Age': isBourbon ? (data.age||'') : (data.size||''),
+    'Proof / Ring Gauge': isBourbon ? (data.proof||'') : (data.ring||''),
+    'Price': data.price || '',
+    'Purchased At': data.purchased || '',
+    'Location': data.location || '',
+    'Origin / Date Bottled': isBourbon ? (data.bottled||'') : (data.origin||''),
+    'Flavors': (data.flavors||[]).join('; '),
+    'Score': data.total || '',
+    'Notes': isBourbon
+      ? [data.noseNotes, data.palateNotes, data.finishNotes, data.why].filter(Boolean).join(' | ')
+      : (data.impression || ''),
+    'Recommend / Pairing': isBourbon ? (data.buyAgain||'') : (data.pairtype||''),
+    'Date Saved': data.savedAt ? new Date(data.savedAt).toLocaleDateString() : '',
+  };
+}
+
+function exportCSV(){
+  const entries = getFilteredEntries();
+  if(!entries.length){ alert('No tastings match the current filter/search to export.'); return; }
+  const rows = entries.map(e=>entryToRow(e.data));
+  const headers = Object.keys(rows[0]);
+  const lines = [headers.map(csvEscape).join(',')];
+  rows.forEach(r=> lines.push(headers.map(h=>csvEscape(r[h])).join(',')));
+  const csv = lines.join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'bama-tastings-'+histFilter+'-'+stamp+'.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
