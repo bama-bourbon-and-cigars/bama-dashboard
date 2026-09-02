@@ -728,6 +728,93 @@ buildTextFields('c-details', [
   {id:'c-location', label:'Location'},
 ]);
 
+/* ---- cigar brand reference library + autocomplete ---- */
+const CIGAR_DB = [
+  {name:"Padron", origin:"Nicaragua"},
+  {name:"Arturo Fuente", origin:"Dominican Republic"},
+  {name:"My Father Cigars", origin:"Nicaragua"},
+  {name:"Oliva", origin:"Nicaragua"},
+  {name:"Rocky Patel", origin:"Honduras / Nicaragua"},
+  {name:"Davidoff", origin:"Dominican Republic"},
+  {name:"Ashton", origin:"Dominican Republic"},
+  {name:"Romeo y Julieta", origin:"Dominican Republic"},
+  {name:"Montecristo", origin:"Dominican Republic"},
+  {name:"La Aroma de Cuba", origin:"Nicaragua"},
+  {name:"Liga Privada (Drew Estate)", origin:"Nicaragua"},
+  {name:"Perdomo", origin:"Nicaragua"},
+  {name:"CAO", origin:"Nicaragua"},
+  {name:"Camacho", origin:"Honduras"},
+  {name:"Tatuaje", origin:"Nicaragua"},
+  {name:"Illusione", origin:"Nicaragua"},
+  {name:"Crowned Heads", origin:"Nicaragua"},
+  {name:"Foundation Cigar Co.", origin:"Nicaragua"},
+  {name:"Alec Bradley", origin:"Honduras"},
+  {name:"Punch", origin:"Honduras"},
+  {name:"Hoyo de Monterrey", origin:"Honduras"},
+  {name:"La Gloria Cubana", origin:"Dominican Republic"},
+  {name:"Partagas", origin:"Dominican Republic"},
+  {name:"H. Upmann", origin:"Dominican Republic"},
+  {name:"San Cristobal", origin:"Nicaragua"},
+  {name:"Nub", origin:"Nicaragua"},
+  {name:"Undercrown (Drew Estate)", origin:"Nicaragua"},
+  {name:"Diesel", origin:"Nicaragua"},
+  {name:"Gurkha", origin:"Nicaragua / Dominican Republic"},
+  {name:"Macanudo", origin:"Dominican Republic"},
+  {name:"Diamond Crown", origin:"Dominican Republic"},
+  {name:"Aging Room", origin:"Dominican Republic"},
+  {name:"E.P. Carrillo", origin:"Dominican Republic"},
+  {name:"Plasencia", origin:"Nicaragua"},
+  {name:"Joya de Nicaragua", origin:"Nicaragua"},
+  {name:"Drew Estate", origin:"Nicaragua"},
+  {name:"Cohiba", origin:"Dominican Republic"},
+  {name:"Cain (Oliva)", origin:"Nicaragua"},
+  {name:"601 (Espinosa)", origin:"Nicaragua"},
+  {name:"Cuesta-Rey", origin:"Dominican Republic"},
+  {name:"Flor de Caña", origin:"Nicaragua"},
+];
+
+function setupAutocomplete(inputId, db, fieldMap, hintText){
+  const input = document.getElementById(inputId);
+  const wrap = input.closest('.field');
+  if(hintText){
+    const hint = el('div','field-hint', hintText);
+    wrap.appendChild(hint);
+  }
+  const list = el('div','autocomplete-list');
+  list.style.display='none';
+  wrap.appendChild(list);
+
+  function renderMatches(q){
+    const matches = db.filter(b=>b.name.toLowerCase().includes(q)).slice(0,8);
+    if(!matches.length){ list.style.display='none'; list.innerHTML=''; return; }
+    list.innerHTML='';
+    matches.forEach(m=>{
+      const item = el('div','autocomplete-item');
+      const subParts = Object.keys(fieldMap).map(k=>m[k]).filter(Boolean).join(' · ');
+      item.innerHTML = `<div class="ac-name">${m.name}</div><div class="ac-sub">${subParts}</div>`;
+      item.onclick = ()=>{
+        input.value = m.name;
+        Object.entries(fieldMap).forEach(([dataKey, fieldId])=>{
+          if(m[dataKey]) document.getElementById(fieldId).value = m[dataKey];
+        });
+        list.style.display='none'; list.innerHTML='';
+      };
+      list.appendChild(item);
+    });
+    list.style.display='block';
+  }
+
+  input.addEventListener('input', ()=>{
+    const q = input.value.trim().toLowerCase();
+    if(q.length<2){ list.style.display='none'; list.innerHTML=''; return; }
+    renderMatches(q);
+  });
+  document.addEventListener('click', (e)=>{
+    if(!wrap.contains(e.target)) list.style.display='none';
+  });
+}
+setupAutocomplete('c-brand', CIGAR_DB, {origin:'c-origin'}, 'Start typing to autofill Country of Origin — always confirm against the actual band/box, since some brands roll multiple origins.');
+
 buildWheel('c-wheel','c-wheel-summary',[
   {name:'SPICE', color:'var(--spice)', options:['Black Pepper','White Pepper','Red Pepper','Cinnamon','Clove','Nutmeg']},
   {name:'WOOD', color:'var(--wood)', options:['Cedar','Oak','Sandalwood','Pine','Charred Wood']},
