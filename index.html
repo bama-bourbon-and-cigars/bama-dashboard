@@ -175,6 +175,18 @@ main{max-width:1180px;margin:0 auto;padding:28px 20px 80px 20px;}
 .empty-state .display{font-size:20px;color:var(--paper);margin-bottom:6px;}
 .type-pill{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:0.5px;padding:3px 9px;border-radius:10px;color:#fff;margin-right:8px;}
 .filter-row{display:flex;gap:8px;margin-bottom:16px;}
+.field{position:relative;}
+.autocomplete-list{
+  position:absolute;z-index:30;background:#fff;border:1px solid #c9b98e;border-radius:6px;
+  margin-top:2px;max-height:230px;overflow-y:auto;width:100%;
+  box-shadow:0 6px 16px rgba(0,0,0,0.18);
+}
+.autocomplete-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee2c8;}
+.autocomplete-item:last-child{border-bottom:none;}
+.autocomplete-item:hover{background:#f3e8cc;}
+.autocomplete-item .ac-name{font-size:13.5px;color:var(--ink);font-weight:600;}
+.autocomplete-item .ac-sub{font-size:11.5px;color:var(--ink-soft);margin-top:1px;}
+.field-hint{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
 .hist-toolbar{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
 .hist-search{
   flex:1;border:1px solid #c9b98e;background:#fbf6ea;border-radius:7px;
@@ -352,8 +364,12 @@ main{max-width:1180px;margin:0 auto;padding:28px 20px 80px 20px;}
   <div class="panel" id="panel-history">
     <div class="hist-toolbar">
       <input type="text" id="hist-search" class="hist-search" placeholder="Search by name, distillery, brand, or flavor…" oninput="setHistSearch(this.value)">
+      <button class="btn btn-ghost" style="padding:10px 16px;font-size:13px;border-color:#6a5c46;" onclick="backupData()">Backup</button>
+      <button class="btn btn-ghost" style="padding:10px 16px;font-size:13px;border-color:#6a5c46;" onclick="document.getElementById('restore-file-input').click()">Restore</button>
+      <input type="file" id="restore-file-input" accept=".json" style="display:none;" onchange="restoreBackup(this.files[0])">
       <button class="btn btn-primary" style="padding:10px 18px;font-size:13px;" onclick="exportCSV()">Export CSV</button>
     </div>
+    <div class="field-hint" style="margin-bottom:14px;color:#a8967a;">Back up regularly, especially before clearing your browser data — a backup file is the only way to recover entries if that happens.</div>
     <div class="filter-row">
       <button class="radio-pill sel" data-hist-filter="all" onclick="setHistFilter('all')">All</button>
       <button class="radio-pill" data-hist-filter="bourbon" onclick="setHistFilter('bourbon')">Bourbon</button>
@@ -571,6 +587,103 @@ buildTextFields('b-details', [
 ]);
 buildCheckRow('b-sampled', ['Neat','Rocks','With Water','Cocktail'], 'b-sampled');
 
+/* ---- bourbon reference library + autocomplete ---- */
+const BOURBON_DB = [
+  {name:"Buffalo Trace", distillery:"Buffalo Trace Distillery", style:"Straight Bourbon", proof:"90"},
+  {name:"Eagle Rare 10 Year", distillery:"Buffalo Trace Distillery", style:"Single Barrel Bourbon", proof:"90", age:"10"},
+  {name:"Blanton's Original Single Barrel", distillery:"Buffalo Trace Distillery", style:"Single Barrel Bourbon", proof:"93"},
+  {name:"W.L. Weller Special Reserve", distillery:"Buffalo Trace Distillery", style:"Wheated Bourbon", proof:"90"},
+  {name:"Weller Antique 107", distillery:"Buffalo Trace Distillery", style:"Wheated Bourbon", proof:"107"},
+  {name:"Pappy Van Winkle's Family Reserve 15 Year", distillery:"Buffalo Trace Distillery", style:"Wheated Bourbon", proof:"107", age:"15"},
+  {name:"E.H. Taylor Small Batch", distillery:"Buffalo Trace Distillery", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Colonel E.H. Taylor Barrel Proof", distillery:"Buffalo Trace Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"George T. Stagg", distillery:"Buffalo Trace Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Stagg Jr.", distillery:"Buffalo Trace Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Ancient Age", distillery:"Buffalo Trace Distillery", style:"Bourbon", proof:"90"},
+  {name:"Maker's Mark", distillery:"Maker's Mark Distillery", style:"Wheated Bourbon", proof:"90"},
+  {name:"Maker's Mark 46", distillery:"Maker's Mark Distillery", style:"Wheated Bourbon", proof:"94"},
+  {name:"Woodford Reserve", distillery:"Woodford Reserve Distillery", style:"Straight Bourbon", proof:"90.4"},
+  {name:"Woodford Reserve Double Oaked", distillery:"Woodford Reserve Distillery", style:"Bourbon", proof:"90.4"},
+  {name:"Four Roses Small Batch", distillery:"Four Roses Distillery", style:"Small Batch Bourbon", proof:"90"},
+  {name:"Four Roses Single Barrel", distillery:"Four Roses Distillery", style:"Single Barrel Bourbon", proof:"100"},
+  {name:"Wild Turkey 101", distillery:"Wild Turkey Distillery", style:"Straight Bourbon", proof:"101"},
+  {name:"Wild Turkey Rare Breed", distillery:"Wild Turkey Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Russell's Reserve 10 Year", distillery:"Wild Turkey Distillery", style:"Small Batch Bourbon", proof:"90", age:"10"},
+  {name:"Russell's Reserve Single Barrel", distillery:"Wild Turkey Distillery", style:"Single Barrel Bourbon", proof:"110"},
+  {name:"Knob Creek", distillery:"Jim Beam", style:"Small Batch Bourbon", proof:"100", age:"9"},
+  {name:"Knob Creek Single Barrel Reserve", distillery:"Jim Beam", style:"Single Barrel Bourbon", proof:"120"},
+  {name:"Booker's", distillery:"Jim Beam", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Baker's", distillery:"Jim Beam", style:"Small Batch Bourbon", proof:"107", age:"7"},
+  {name:"Basil Hayden's", distillery:"Jim Beam", style:"Bourbon", proof:"80"},
+  {name:"Jim Beam White Label", distillery:"Jim Beam", style:"Bourbon", proof:"80"},
+  {name:"Old Grand-Dad 114", distillery:"Jim Beam", style:"Bourbon", proof:"114"},
+  {name:"Elijah Craig Small Batch", distillery:"Heaven Hill Distillery", style:"Small Batch Bourbon", proof:"94"},
+  {name:"Elijah Craig Barrel Proof", distillery:"Heaven Hill Distillery", style:"Barrel Proof Bourbon", proof:""},
+  {name:"Evan Williams Black Label", distillery:"Heaven Hill Distillery", style:"Bourbon", proof:"86"},
+  {name:"Evan Williams Bottled-in-Bond", distillery:"Heaven Hill Distillery", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Larceny", distillery:"Heaven Hill Distillery", style:"Wheated Bourbon", proof:"92"},
+  {name:"Henry McKenna Single Barrel 10 Year", distillery:"Heaven Hill Distillery", style:"Bottled-in-Bond Bourbon", proof:"100", age:"10"},
+  {name:"Heaven Hill Bottled-in-Bond", distillery:"Heaven Hill Distillery", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Fighting Cock", distillery:"Heaven Hill Distillery", style:"Bourbon", proof:"103"},
+  {name:"Old Forester 86", distillery:"Brown-Forman", style:"Bourbon", proof:"86"},
+  {name:"Old Forester 100 Proof", distillery:"Brown-Forman", style:"Bottled-in-Bond Bourbon", proof:"100"},
+  {name:"Old Forester 1920 Prohibition Style", distillery:"Brown-Forman", style:"Barrel Strength Bourbon", proof:""},
+  {name:"Old Forester Statesman", distillery:"Brown-Forman", style:"Barrel Strength Bourbon", proof:""},
+  {name:"1792 Small Batch", distillery:"Barton 1792 Distillery", style:"Small Batch Bourbon", proof:"93.7"},
+  {name:"1792 Full Proof", distillery:"Barton 1792 Distillery", style:"Full Proof Bourbon", proof:"125"},
+  {name:"Very Old Barton", distillery:"Barton 1792 Distillery", style:"Bourbon", proof:""},
+  {name:"Bulleit Bourbon", distillery:"Bulleit Distilling Co.", style:"High Rye Bourbon", proof:"90"},
+  {name:"Angel's Envy", distillery:"Angel's Envy Distillery", style:"Port Barrel Finished Bourbon", proof:"86.6"},
+  {name:"Michter's US*1 Bourbon", distillery:"Michter's Distillery", style:"Small Batch Bourbon", proof:"91.4"},
+  {name:"Willett Pot Still Reserve", distillery:"Willett Distillery", style:"Bourbon", proof:"94"},
+  {name:"Noah's Mill", distillery:"Willett Distillery", style:"Barrel Proof Bourbon", proof:"114.3"},
+  {name:"Rowan's Creek", distillery:"Willett Distillery", style:"Bourbon", proof:"100.1"},
+  {name:"Rebel Yell", distillery:"Lux Row Distillers", style:"Wheated Bourbon", proof:"80"},
+  {name:"Old Ezra 7 Year Barrel Strength", distillery:"Lux Row Distillers", style:"Barrel Proof Bourbon", age:"7"},
+  {name:"Jefferson's Ocean", distillery:"Jefferson's Bourbon", style:"Bourbon", proof:"90"},
+];
+
+function setupBourbonAutocomplete(){
+  const input = document.getElementById('b-name');
+  const wrap = input.closest('.field');
+  const hint = el('div','field-hint','Suggestions are typical reference values — confirm against your actual bottle/batch.');
+  wrap.appendChild(hint);
+  const list = el('div','autocomplete-list');
+  list.style.display='none';
+  wrap.appendChild(list);
+
+  function renderMatches(q){
+    const matches = BOURBON_DB.filter(b=>b.name.toLowerCase().includes(q)).slice(0,8);
+    if(!matches.length){ list.style.display='none'; list.innerHTML=''; return; }
+    list.innerHTML='';
+    matches.forEach(m=>{
+      const item = el('div','autocomplete-item');
+      const subParts = [m.distillery, m.style, m.proof?m.proof+' proof':'', m.age?m.age+' yr':''].filter(Boolean).join(' · ');
+      item.innerHTML = `<div class="ac-name">${m.name}</div><div class="ac-sub">${subParts}</div>`;
+      item.onclick = ()=>{
+        input.value = m.name;
+        if(m.distillery) document.getElementById('b-distillery').value = m.distillery;
+        if(m.style) document.getElementById('b-style').value = m.style;
+        if(m.proof) document.getElementById('b-proof').value = m.proof;
+        if(m.age) document.getElementById('b-age').value = m.age;
+        list.style.display='none'; list.innerHTML='';
+      };
+      list.appendChild(item);
+    });
+    list.style.display='block';
+  }
+
+  input.addEventListener('input', ()=>{
+    const q = input.value.trim().toLowerCase();
+    if(q.length<2){ list.style.display='none'; list.innerHTML=''; return; }
+    renderMatches(q);
+  });
+  document.addEventListener('click', (e)=>{
+    if(!wrap.contains(e.target)) list.style.display='none';
+  });
+}
+setupBourbonAutocomplete();
+
 buildWheel('b-wheel','b-wheel-summary',[
   {name:'SPICE', color:'var(--spice)', options:['Cinnamon','Nutmeg','Black Pepper','Rye Spice','Ginger']},
   {name:'OAK', color:'var(--oak)', options:['Oak','Vanilla','Caramel','Toasted Oak','Baking Spice','Tannin','Wood Smoke']},
@@ -717,10 +830,19 @@ async function saveEntry(kind){
   const msgEl = document.getElementById(kind==='bourbon'?'b-save-msg':'c-save-msg');
   try{
     const res = await window.storage.set(key, JSON.stringify(data), false);
-    msgEl.textContent = res ? 'Saved ✓' : 'Save failed — try again.';
-    setTimeout(()=>{msgEl.textContent='';}, 3000);
+    if(res){
+      msgEl.textContent = 'Saved ✓ — resetting for your next tasting…';
+      setTimeout(()=>{
+        clearForm(kind);
+        msgEl.textContent = '';
+      }, 1300);
+    } else {
+      msgEl.textContent = 'Save failed — try again.';
+      setTimeout(()=>{msgEl.textContent='';}, 3000);
+    }
   }catch(e){
     msgEl.textContent = 'Save failed — try again.';
+    setTimeout(()=>{msgEl.textContent='';}, 3000);
   }
 }
 
@@ -878,6 +1000,55 @@ function exportCSV(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+/* ---------------- backup / restore ---------------- */
+async function backupData(){
+  try{
+    const res = await window.storage.list('', false);
+    const keys = (res && res.keys) ? res.keys.filter(k=>k.startsWith('bourbon:')||k.startsWith('cigar:')) : [];
+    if(!keys.length){ alert('There\'s nothing saved yet to back up.'); return; }
+    const payload = [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, false);
+        if(r) payload.push({key:k, data: JSON.parse(r.value)});
+      }catch(e){}
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = 'bama-backup-'+stamp+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }catch(e){
+    alert('Backup failed — please try again.');
+  }
+}
+
+async function restoreBackup(file){
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const payload = JSON.parse(text);
+    if(!Array.isArray(payload)) throw new Error('bad format');
+    let count = 0;
+    for(const item of payload){
+      if(item && item.key && item.data && (item.key.startsWith('bourbon:')||item.key.startsWith('cigar:'))){
+        await window.storage.set(item.key, JSON.stringify(item.data), false);
+        count++;
+      }
+    }
+    document.getElementById('restore-file-input').value = '';
+    alert(count+' tasting'+(count===1?'':'s')+' restored.');
+    renderHistory();
+  }catch(e){
+    alert('That file doesn\'t look like a valid BAMA backup — please pick the .json file created by the Backup button.');
+  }
 }
 </script>
 </body>
