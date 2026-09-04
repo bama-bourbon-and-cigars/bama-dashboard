@@ -35,6 +35,9 @@
   --lactic:#b8a06a;
   --earthy:#5a4a2e;
   --herbal:#4a7a5a;
+  --mineral:#5a6570;
+  --pepper:#6b3a30;
+  --toasted:#7a5230;
   --line:#cbb98f;
 }
 *{box-sizing:border-box;}
@@ -878,12 +881,18 @@ function setupAutocomplete(inputId, db, fieldMap, hintText){
 setupAutocomplete('c-brand', CIGAR_DB, {origin:'c-origin'}, 'Start typing to autofill Country of Origin — always confirm against the actual band/box, since some brands roll multiple origins.');
 
 buildWheel('c-wheel','c-wheel-summary',[
-  {name:'SPICE', color:'var(--spice)', options:['Black Pepper','White Pepper','Red Pepper','Cinnamon','Clove','Nutmeg']},
-  {name:'WOOD', color:'var(--wood)', options:['Cedar','Oak','Sandalwood','Pine','Charred Wood']},
-  {name:'EARTH', color:'var(--earth)', options:['Earthy','Mineral','Moss','Grass','Barnyard']},
-  {name:'SWEET', color:'var(--sweet)', options:['Cream','Molasses','Brown Sugar','Caramel','Cocoa','Maple','Marzipan']},
-  {name:'NUTS', color:'var(--nut)', options:['Peanut','Cashew','Walnut','Hazelnut','Almond']},
-  {name:'LEATHER', color:'var(--leather)', options:['Espresso','Coffee','Dark Chocolate','Leather']},
+  {name:'HERB', color:'var(--herbal)', options:['Fern','Grass','Hay','Tea','Wet Leaves','Vegetables']},
+  {name:'WOOD', color:'var(--oak)', options:['Cedar','Oak','Pencil','Pine Sap','Sandalwood','Shavings']},
+  {name:'MINERAL', color:'var(--mineral)', options:['Graphite','Iodine']},
+  {name:'EARTH', color:'var(--earth)', options:['Humus','Moss','Mushroom','Peat','Truffle','Undergrowth','Yeast']},
+  {name:'PEPPER', color:'var(--pepper)', options:['Black Pepper','White Pepper','Green Chili','Red Pepper']},
+  {name:'SPICE', color:'var(--spice)', options:['Allspice','Anise','Balsamic','Bittersweet','Cardamom','Cinnamon','Cloves','Cumin','Fresh Spice','Ginger','Licorice','Nutmeg','Sweet Spice','Turmeric','Vanilla']},
+  {name:'FLOWERS', color:'var(--floral)', options:['Dried Flowers','Lavender']},
+  {name:'FRUIT', color:'var(--fruit)', options:['Black Currant','Citrus','Dried Fruits','Prune','Raspberry','Ripe Fruit']},
+  {name:'SWEET', color:'var(--sweet)', options:['Rum','Pastry','Tart','Honey','Gingerbread','Chocolate Milk','Dark Chocolate','Cappuccino','Brown Sugar']},
+  {name:'NUT', color:'var(--grain)', options:['Walnut','Peanut','Hazelnut','Fresh Walnut','Fresh Hazelnut','Chestnut','Cashew','Brazil Nut','Bitter Almond','Almond']},
+  {name:'TOASTED', color:'var(--toasted)', options:['Toasted Bread','Smoked','Roasted Meat','Malt','Coffee','Bitter Cocoa','Caramel','Cocoa','Brioche','Bread','Biscuit','Cookie']},
+  {name:'OTHER', color:'var(--flawed)', options:['Ammonia','Cardboard','Coal','Dust','Fermented Hay','Sulfur','Tar']},
 ]);
 
 buildStars('c-appearance',5);
