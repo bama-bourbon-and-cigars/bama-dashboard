@@ -25,6 +25,16 @@
   --wood:#6b4423;
   --earth:#4a5d3a;
   --leather:#3a2c22;
+  --floral:#8a5a7a;
+  --finished:#6e2b47;
+  --aged:#6b5842;
+  --flawed:#5a5550;
+  --industrial:#46484f;
+  --primarytaste:#a8752a;
+  --textural:#6e7a6a;
+  --lactic:#b8a06a;
+  --earthy:#5a4a2e;
+  --herbal:#4a7a5a;
   --line:#cbb98f;
 }
 *{box-sizing:border-box;}
@@ -727,12 +737,22 @@ function setupBourbonAutocomplete(){
 setupBourbonAutocomplete();
 
 buildWheel('b-wheel','b-wheel-summary',[
-  {name:'SPICE', color:'var(--spice)', options:['Cinnamon','Nutmeg','Black Pepper','Rye Spice','Ginger']},
-  {name:'OAK', color:'var(--oak)', options:['Oak','Vanilla','Caramel','Toasted Oak','Baking Spice','Tannin','Wood Smoke']},
-  {name:'FRUIT', color:'var(--fruit)', options:['Dried Fruit','Dark Fruit','Citrus','Apple','Berry','Stone Fruit']},
-  {name:'SWEET', color:'var(--sweet)', options:['Caramel','Brown Sugar','Butterscotch','Clover Honey','Honey','Maple']},
-  {name:'GRAIN', color:'var(--grain)', options:['Bready','Malt','Rye','Barley','Corn','Molasses']},
-  {name:'NUT', color:'var(--nut)', options:['Almond','Walnut','Pecan','Hazelnut','Peanut','Chestnut']},
+  {name:'SPICE', color:'var(--spice)', options:['Cinnamon','Clove','Nutmeg','Ginger','Cardamom','Coriander','Caraway','Pepper','Allspice']},
+  {name:'FLORAL', color:'var(--floral)', options:['Rose','Lavender','White Lily','Perfume','Florist Shop','Wildflowers','Dead Flowers','Potpourri']},
+  {name:'FRUITY', color:'var(--fruit)', options:['Lemon','Orange','Pomelo','Tangerine','Grapefruit','Lime','Cherry','Plum','Peach','Apricot','Nectarine','Apple','Pear','Fig','Grape','Banana','Coconut','Guava','Mango','Pineapple','Papaya','Watermelon','Honeydew','Blackberry','Blueberry','Raspberry','Cranberry','Strawberry','Zest','Peel','Pith','Rind','Artificial','Raisin','Date','Dried Fig','Prune','Dried Apricot','Jam','Marmalade','Cobbler','Stewed Fruit']},
+  {name:'FINISHED', color:'var(--finished)', options:['Red Wine','White Wine','Sherry','Port','Madeira','Marsala','Rum','Brandy','Tequila','Tokaji']},
+  {name:'AGED', color:'var(--aged)', options:['Funky','Leather','Old Library','Dust','Wood Polish','Mushroom','Varnish','Molasses']},
+  {name:'FLAWED', color:'var(--flawed)', options:['Struck Match','Cabbage','Egg','Mold','Cardboard','Wet Dog','Yogurt','Cheese','Vinegar','Bitter','Charred Grain','Murky','Acetone','Lacquer','Solvent']},
+  {name:'INDUSTRIAL', color:'var(--industrial)', options:['Marker','Paint','New Carpet','New Tire','Garden Hose','Candle','Beeswax']},
+  {name:'PRIMARY TASTE', color:'var(--primarytaste)', options:['Wood Sugars','Unresolved Acids','Sweet','Salty','Sour','Bitter','Tannin','Burnt Mash']},
+  {name:'TEXTURAL', color:'var(--textural)', options:['Mineral','Chalky','Flinty','Graphite','Hard Water','Vitamin','Tannic','Grippy','Drying','Hard','Chewy','Velvety','Light','Elegant','Thin','Nimble','Hot','Fiery','Unbalanced','Heavy','Rich','Viscous','Syrupy','Oily']},
+  {name:'WOODY', color:'var(--oak)', options:['Oak','Maple','Cedar','Balsa','Sandalwood','Mahogany','Hickory','Pencil Shavings','Charcoal','Campfire','Cola','Creme Brulee','Pastry','Graham Cracker']},
+  {name:'SWEET', color:'var(--sweet)', options:['Chocolate','Milk Chocolate','Dark Chocolate','White Chocolate','Fudge','Cacao','Caramel','Butterscotch','Toffee','Vanilla','Bubblegum','Marshmallow','Brown Sugar','White Sugar','Burnt Sugar','Maple Syrup','Honey','Artificial']},
+  {name:'LACTIC', color:'var(--lactic)', options:['Dairy','Popcorn Butter','Cream']},
+  {name:'NUTTY', color:'var(--nut)', options:['Peanut','Almond','Hazelnut','Chestnut','Walnut','Pecan','Cashew']},
+  {name:'GRAINY', color:'var(--grain)', options:['Corn','Rye','Wheat','Barley','Mash','Corn Bread','Popcorn','Rye Bread','Wheat Bread','Malted Barley','Cereal','Biscuit','Yeast','Ale']},
+  {name:'EARTHY', color:'var(--earthy)', options:['Lawn Clippings','Dry Grass','Dry Leaves','Foliage','Musty','Cellar','Barnyard','Rickhouse','Tobacco','Cigar','Pipe Tobacco','Cigarette','Coffee','Ground Coffee','Brewed Coffee','Burnt Coffee']},
+  {name:'HERBAL', color:'var(--herbal)', options:['Fresh','Dill','Tarragon','Eucalyptus','Mint','Peppermint','Spearmint','Wintergreen','Licorice','Cough Syrup','Turpentine','Black Tea','Green Tea','Dried Herbs','Incense']},
 ]);
 
 buildSwatches('b-color', [
